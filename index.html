@@ -40,20 +40,43 @@
       <div class="logo">BA</div>
       <div>
         <h1>ByteAlchemy</h1>
-        <p class="lead"> </p>
+        <p class="lead">Startet am 6. Oktober 2025 um 00:00.</p>
       </div>
     </header>
 
     <div class="countdown" aria-live="polite" id="countdown">
       <div class="panel">
-        <p>There is an error at the moment, we are working to fix it, thank you!</p>
+        <div class="num" id="days">--</div>
+        <div class="label">Tage</div>
       </div>
+      <div class="panel">
+        <div class="num" id="hours">--</div>
+        <div class="label">Stunden</div>
+      </div>
+      <div class="panel">
+        <div class="num" id="minutes">--</div>
+        <div class="label">Minuten</div>
+      </div>
+      <div class="panel">
+        <div class="num" id="seconds">--</div>
+        <div class="label">Sekunden</div>
+      </div>
+    </div>
+
+    <div class="status-box">
+      <div class="small">Status: <span id="status">—</span></div>
+      <div class="small" id="startedAt">Startzeit: 6. Oktober 2025, 00:00 UTC</div>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="bar" aria-hidden="true"><i id="progress"></i></div>
+      <div class="meta">Fortschritt: <span id="percent">0%</span> — Länge: 14 Tage</div>
     </div>
   </div>
 
 <script>
 (function(){
-  const START_TIME = new Date('2025-10-05T18:40:00Z').getTime();
+  const START_TIME = new Date('2025-10-06T00:00:00Z').getTime();
   const DURATION = 14 * 24 * 60 * 60 * 1000; // 14 Tage in ms
 
   const $ = id => document.getElementById(id);
@@ -64,6 +87,25 @@
 
   function updateUI(){
     const now = Date.now();
+
+    if (now < START_TIME) {
+      const untilStart = START_TIME - now;
+      const days = Math.floor(untilStart / (24*60*60*1000));
+      const hours = Math.floor((untilStart % (24*60*60*1000)) / (60*60*1000));
+      const minutes = Math.floor((untilStart % (60*60*1000)) / (60*1000));
+      const seconds = Math.floor((untilStart % (60*1000)) / 1000);
+
+      daysEl.textContent = format(days);
+      hoursEl.textContent = format(hours);
+      minutesEl.textContent = format(minutes);
+      secondsEl.textContent = format(seconds);
+
+      statusEl.textContent = 'Startet in';
+      progressEl.style.width = '0%';
+      percentEl.textContent = '0%';
+      return;
+    }
+
     const end = START_TIME + DURATION;
     const remaining = Math.max(0, end - now);
 
@@ -84,8 +126,8 @@
     minutesEl.textContent = format(minutes);
     secondsEl.textContent = format(seconds);
 
-    const elapsed = DURATION - remaining;
-    const pct = Math.min(100, Math.round((elapsed / DURATION) * 100));
+    const elapsed = now - START_TIME;
+    const pct = Math.min(100, Math.max(0, Math.round((elapsed / DURATION) * 100)));
     progressEl.style.width = pct + '%';
     percentEl.textContent = pct + '%';
 
