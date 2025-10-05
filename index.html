@@ -65,7 +65,7 @@
 
     <div class="status-box">
       <div class="small">Status: <span id="status">—</span></div>
-      <div class="small" id="startedAt"></div>
+      <div class="small" id="startedAt">Gestartet: 5. Oktober 2025, 18:40 UTC</div>
     </div>
 
     <div class="progress-wrap">
@@ -76,39 +76,27 @@
 
 <script>
 (function(){
-  const STORAGE_KEY = 'bytealchemyCooldownStart';
+  const START_TIME = new Date('2025-10-05T18:40:00Z').getTime();
   const DURATION = 14 * 24 * 60 * 60 * 1000; // 14 Tage in ms
 
   const $ = id => document.getElementById(id);
   const daysEl = $('days'), hoursEl = $('hours'), minutesEl = $('minutes'), secondsEl = $('seconds');
-  const statusEl = $('status'), startedAtEl = $('startedAt');
-  const progressEl = $('progress'), percentEl = $('percent');
+  const statusEl = $('status'), progressEl = $('progress'), percentEl = $('percent');
 
   function format(n){return String(n).padStart(2,'0')}
 
-  function getStart(){
-    const v = localStorage.getItem(STORAGE_KEY);
-    return v ? parseInt(v,10) : null;
-  }
+  function updateUI(){
+    const now = Date.now();
+    const end = START_TIME + DURATION;
+    const remaining = Math.max(0, end - now);
 
-  function setStart(ts){
-    localStorage.setItem(STORAGE_KEY,String(ts));
-    updateStartedAt(ts);
-  }
-
-  function updateStartedAt(ts){
-    if(!ts){ startedAtEl.textContent = '' ; return }
-    const d = new Date(ts);
-    startedAtEl.textContent = 'Gestartet: ' + d.toLocaleString();
-  }
-
-  function updateUI(remaining){
     if(remaining <= 0){
       daysEl.textContent = '00'; hoursEl.textContent='00'; minutesEl.textContent='00'; secondsEl.textContent='00';
       statusEl.textContent = 'Cooldown abgelaufen';
       progressEl.style.width = '100%'; percentEl.textContent = '100%';
       return;
     }
+
     const days = Math.floor(remaining / (24*60*60*1000));
     const hours = Math.floor((remaining % (24*60*60*1000)) / (60*60*1000));
     const minutes = Math.floor((remaining % (60*60*1000)) / (60*1000));
@@ -127,22 +115,8 @@
     statusEl.textContent = 'Cooldown läuft';
   }
 
-  function tick(){
-    let start = getStart();
-    if(!start){
-      setStart(Date.now());
-      start = getStart();
-    }
-    const now = Date.now();
-    const end = start + DURATION;
-    const remaining = Math.max(0, end - now);
-    updateUI(remaining);
-  }
-
-  // initial
-  updateStartedAt(getStart());
-  tick();
-  setInterval(tick, 1000);
+  updateUI();
+  setInterval(updateUI, 1000);
 })();
 </script>
 </body>
