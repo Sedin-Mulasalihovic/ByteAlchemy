@@ -422,6 +422,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- ...dein bisheriger HTML-Code bleibt unverändert bis zum Firebase-Script... -->
+
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyCUUJ-Cjx2fS3d4z4BGy_wYMvg91HSUd08",
@@ -477,7 +479,8 @@
         usernameDisplay.textContent = `👋 Willkommen, ${
           (await userRef.get()).data().username
         }!`;
-        loadChat();
+
+        loadChat(); // <-- hier wird die neue Chat-Funktion aufgerufen
         loadQuests();
         loadLeaderboard();
         cleanupOldMessages();
@@ -508,13 +511,11 @@
         if (!user) return;
         const udoc = await db.collection("users").doc(user.uid).get();
         const uname = udoc.exists ? udoc.data().username : user.email;
-        await db
-          .collection("messages")
-          .add({
-            user: uname,
-            text,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          });
+        await db.collection("messages").add({
+          user: uname,
+          text,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        });
         chatInput.value = "";
         addXP(user.uid, 5);
       }
@@ -546,6 +547,40 @@
           "de-DE",
           { hour: "2-digit", minute: "2-digit" }
         )}`;
+      }
+
+      async function loadChat() {
+        const messagesRef = db
+          .collection("messages")
+          .orderBy("createdAt", "desc")
+          .limit(50); // nur die letzten 50 Nachrichten
+
+        messagesRef.onSnapshot((snapshot) => {
+          chatBox.innerHTML = "";
+          const messages = snapshot.docs.reverse(); // chronologisch anzeigen
+
+          messages.forEach((doc) => {
+            const msg = doc.data();
+            const div = document.createElement("div");
+            div.className = "message";
+
+            const time = msg.createdAt
+              ? msg.createdAt.toDate().toLocaleTimeString("de-DE", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "";
+
+            div.innerHTML = `<span class="user">${escapeHtml(
+              msg.user
+            )}:</span> ${escapeHtml(
+              msg.text
+            )} <span style="color:var(--muted);font-size:12px;">${time}</span>`;
+            chatBox.appendChild(div);
+          });
+
+          chatBox.scrollTop = chatBox.scrollHeight; // automatisch nach unten scrollen
+        });
       }
 
       async function loadQuests() {
@@ -612,7 +647,7 @@
         let rank = 1;
         snap.forEach((d) => {
           const u = d.data();
-          if (seenUsers.has(u.username)) return; // Duplikate vermeiden
+          if (seenUsers.has(u.username)) return;
           seenUsers.add(u.username);
           const el = document.createElement("div");
           el.innerHTML = `<strong>${rank}. ${escapeHtml(
