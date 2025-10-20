@@ -18,6 +18,7 @@
         --muted: #9aa4b2;
         --navbar-height: 72px;
       }
+      /* Grund-Styles, Navbar, Cards etc. bleiben wie vorher */
       html,
       body {
         height: 100%;
@@ -53,16 +54,6 @@
         backdrop-filter: blur(8px) saturate(1.1);
         border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         z-index: 1000;
-        transition: height 0.22s ease, padding 0.22s ease, background 0.22s ease;
-      }
-      nav.navbar.small {
-        height: 56px;
-        padding: 0 18px;
-        background: linear-gradient(
-          180deg,
-          rgba(6, 10, 18, 0.9),
-          rgba(6, 10, 18, 0.85)
-        );
       }
       .logout-btn {
         background: linear-gradient(90deg, var(--accent), var(--accent-alt));
@@ -181,7 +172,7 @@
         text-shadow: 0 0 10px rgba(139, 92, 246, 0.35);
       }
       section {
-        padding-top: calc(var(--navbar-height) + 36px);
+        padding-top: calc(var(--navbar-height)+36px);
         padding-bottom: 60px;
         min-height: calc(100vh - var(--navbar-height));
         box-sizing: border-box;
@@ -190,9 +181,6 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-      }
-      section[id] {
-        scroll-margin-top: calc(var(--navbar-height)+12px);
       }
       .card {
         width: 100%;
@@ -298,50 +286,21 @@
         opacity: 1;
         transform: none;
       }
-      @media (max-width: 900px) {
-        :root {
-          --navbar-height: 64px;
-        }
-        nav.navbar {
-          padding: 0 18px;
-        }
-        .logo {
-          width: 88px;
-          height: 88px;
-          font-size: 28px;
-          border-radius: 16px;
-        }
-        h1 {
-          font-size: 1.6rem;
-        }
-        section {
-          padding-top: calc(var(--navbar-height)+20px);
-        }
-        .card {
-          margin: 12px;
-          padding: 16px;
-        }
+      .quest-complete {
+        animation: questCompletePop 0.6s ease forwards;
       }
-      @media (max-width: 480px) {
-        :root {
-          --navbar-height: 56px;
+      @keyframes questCompletePop {
+        0% {
+          transform: scale(1);
+          box-shadow: 0 0 0 rgba(0, 255, 0, 0);
         }
-        .nav-links {
-          display: none;
+        50% {
+          transform: scale(1.05);
+          box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
         }
-        .nav-toggle {
-          display: flex;
-        }
-        .logo {
-          width: 78px;
-          height: 78px;
-          font-size: 22px;
-        }
-        .controls {
-          flex-direction: column;
-        }
-        .chat-box {
-          max-height: 40vh;
+        100% {
+          transform: scale(1);
+          box-shadow: 0 0 0 rgba(0, 255, 0, 0);
         }
       }
     </style>
@@ -440,9 +399,9 @@
       const chatResetInfo = document.getElementById("chatResetInfo");
       const leaderboardList = document.getElementById("leaderboardList");
       const questsList = document.getElementById("questsList");
-
       const navToggle = document.getElementById("navToggle");
       const mobileMenu = document.getElementById("mobileMenu");
+
       navToggle.addEventListener("click", () => {
         mobileMenu.classList.toggle("show");
       });
@@ -479,7 +438,7 @@
           (await userRef.get()).data().username
         }!`;
 
-        addSampleQuests(); // <-- automatisch Quests hinzufügen, falls noch keine
+        addSampleQuests();
         loadChat();
         loadQuests();
         loadLeaderboard();
@@ -491,7 +450,6 @@
         await auth.signOut();
         window.location.href = "index.html";
       }
-
       async function addXP(userId, xpToAdd) {
         const userRef = db.collection("users").doc(userId);
         await db.runTransaction(async (tx) => {
@@ -511,11 +469,13 @@
         if (!user) return;
         const udoc = await db.collection("users").doc(user.uid).get();
         const uname = udoc.exists ? udoc.data().username : user.email;
-        await db.collection("messages").add({
-          user: uname,
-          text,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+        await db
+          .collection("messages")
+          .add({
+            user: uname,
+            text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
         chatInput.value = "";
         addXP(user.uid, 5);
       }
@@ -560,13 +520,15 @@
           messages.forEach((doc) => {
             const msg = doc.data();
             const div = document.createElement("div");
-            div.className = "message";
             const time = msg.createdAt
-              ? msg.createdAt.toDate().toLocaleTimeString("de-DE", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
+              ? msg.createdAt
+                  .toDate()
+                  .toLocaleTimeString("de-DE", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
               : "";
+            div.className = "message";
             div.innerHTML = `<span class="user">${escapeHtml(
               msg.user
             )}:</span> ${escapeHtml(
@@ -581,20 +543,15 @@
       async function loadQuests() {
         const user = auth.currentUser;
         if (!user) return;
-
-        // Lade abgeschlossene Quests des Nutzers
         const userProgressRef = db
           .collection("users")
           .doc(user.uid)
           .collection("progress");
-
         const progressSnap = await userProgressRef.get();
         const completedQuests = new Set();
         progressSnap.forEach((doc) => {
           if (doc.data().done) completedQuests.add(doc.id);
         });
-
-        // Lade alle Quests
         const snap = await db.collection("quests").get();
         questsList.innerHTML = "";
         if (snap.empty) {
@@ -602,25 +559,22 @@
             "Noch keine Quests vorhanden – füge welche in Firestore hinzu!";
           return;
         }
-
         snap.forEach((d) => {
           const q = d.data();
           const wrapper = document.createElement("div");
+          wrapper.dataset.questId = d.id;
           wrapper.style.marginBottom = "12px";
           wrapper.style.transition = "background 0.5s, box-shadow 0.5s";
           wrapper.style.padding = "10px";
-
           wrapper.innerHTML = `<strong>${escapeHtml(
             q.title || "Quest"
           )}</strong> (${escapeHtml(
             q.category || ""
           )})<br><p style="margin:6px 0">${escapeHtml(q.question || "")}</p>`;
-
           const answersDiv = document.createElement("div");
           answersDiv.style.display = "flex";
           answersDiv.style.flexWrap = "wrap";
           answersDiv.style.gap = "8px";
-
           if (completedQuests.has(d.id)) {
             const doneLabel = document.createElement("span");
             doneLabel.textContent = "✅ Quest erledigt";
@@ -642,7 +596,6 @@
               answersDiv.appendChild(btn);
             });
           }
-
           wrapper.appendChild(answersDiv);
           questsList.appendChild(wrapper);
         });
@@ -659,6 +612,15 @@
             .doc(questId)
             .set({ done: true, xp, completedAt: new Date() });
           addXP(user.uid, xp);
+          // Quest sofort markieren
+          const questDivs = questsList.children;
+          for (let div of questDivs) {
+            if (div.dataset.questId === questId) {
+              div.style.background = "rgba(0,128,0,0.1)";
+              div.querySelector("span")?.classList.add("quest-complete");
+            }
+          }
+          loadQuests();
         } else {
           alert("❌ Falsch, versuch's nochmal!");
         }
@@ -670,9 +632,9 @@
           .collection("users")
           .orderBy("totalXP", "desc")
           .get();
-        const seenUsers = new Set();
         leaderboardList.innerHTML = "";
         let rank = 1;
+        const seenUsers = new Set();
         snap.forEach((d) => {
           const u = d.data();
           if (seenUsers.has(u.username)) return;
@@ -696,7 +658,6 @@
         });
       }
 
-      // ----- Beispiel-Quests Script -----
       async function addSampleQuests() {
         const questsRef = db.collection("quests");
         const snap = await questsRef.get();
@@ -735,7 +696,7 @@
           await questsRef.add(q);
         }
         console.log("Beispiel-Quests erfolgreich hinzugefügt!");
-        loadQuests(); // sofort anzeigen
+        loadQuests();
       }
 
       window.addEventListener("scroll", () => {
