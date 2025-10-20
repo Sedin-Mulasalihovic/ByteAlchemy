@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <title>ByteAlchemy</title>
+    <style>
+      :root {
+        --bg: #050912;
+        --card: rgba(255, 255, 255, 0.04);
+        --glass: rgba(255, 255, 255, 0.06);
+        --accent: #22d3ee;
+        --accent-alt: #8b5cf6;
+        --text: #e6eef6;
+        --muted: #9aa4b2;
+        --navbar-height: 72px;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        background: radial-gradient(
+          circle at 10% 10%,
+          #071025 0%,
+          #050912 50%,
+          #030612 100%
+        );
+        color: var(--text);
+        scroll-behavior: smooth;
+      }
+      nav.navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--navbar-height);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 28px;
+        background: linear-gradient(
+          180deg,
+          rgba(6, 10, 18, 0.6),
+          rgba(6, 10, 18, 0.45)
+        );
+        backdrop-filter: blur(8px) saturate(1.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        z-index: 1000;
+        transition: height 0.22s ease, padding 0.22s ease, background 0.22s ease;
+      }
+      nav.navbar.small {
+        height: 56px;
+        padding: 0 18px;
+        background: linear-gradient(
+          180deg,
+          rgba(6, 10, 18, 0.9),
+          rgba(6, 10, 18, 0.85)
+        );
+      }
+      .logout-btn {
+        background: linear-gradient(90deg, var(--accent), var(--accent-alt));
+        color: white;
+        cursor: pointer;
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+      }
+      .nav-logo {
+        color: var(--accent);
+        font-weight: 800;
+        letter-spacing: 1px;
+        font-size: 1.4rem;
+      }
+      .nav-links {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 20px;
+        align-items: center;
+      }
+      .nav-links a {
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .nav-links a:hover {
+        color: var(--accent);
+      }
+      .nav-toggle {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        gap: 4px;
+      }
+      .nav-toggle span {
+        display: block;
+        width: 24px;
+        height: 3px;
+        background: var(--accent);
+        border-radius: 2px;
+        transition: all 0.3s ease;
+      }
+      .mobile-menu {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transition: max-height 0.35s ease, opacity 0.35s ease;
+        position: absolute;
+        top: var(--navbar-height);
+        right: 0;
+        background: rgba(6, 10, 18, 0.95);
+        backdrop-filter: blur(8px) saturate(1.1);
+        width: 200px;
+        border-radius: 0 0 10px 10px;
+        padding: 12px 0;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+      .mobile-menu.show {
+        max-height: 500px;
+        opacity: 1;
+      }
+      .mobile-menu a {
+        padding: 10px 20px;
+        display: block;
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .mobile-menu a:hover {
+        background: rgba(34, 211, 238, 0.1);
+        color: var(--accent);
+      }
+      .logo {
+        width: 110px;
+        height: 110px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #041015;
+        font-size: 34px;
+        margin-bottom: 18px;
+        box-shadow: 0 6px 30px rgba(139, 92, 246, 0.35);
+        animation: logoGlow 3s ease-in-out infinite alternate;
+      }
+      @keyframes logoGlow {
+        from {
+          box-shadow: 0 6px 18px rgba(139, 92, 246, 0.25);
+        }
+        to {
+          box-shadow: 0 10px 40px rgba(139, 92, 246, 0.9);
+        }
+      }
+      h1 {
+        font-size: 2.2rem;
+        margin: 8px 0 6px 0;
+        color: var(--accent);
+      }
+      #usernameDisplay {
+        font-size: 1.2rem;
+        color: var(--accent-alt);
+        margin-bottom: 18px;
+        text-shadow: 0 0 10px rgba(139, 92, 246, 0.35);
+      }
+      section {
+        padding-top: calc(var(--navbar-height) + 36px);
+        padding-bottom: 60px;
+        min-height: calc(100vh - var(--navbar-height));
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      section[id] {
+        scroll-margin-top: calc(var(--navbar-height)+12px);
+      }
+      .card {
+        width: 100%;
+        max-width: 760px;
+        background: var(--glass);
+        border-radius: 16px;
+        padding: 22px;
+        margin: 18px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(6px) saturate(1.05);
+        text-align: left;
+      }
+      h2 {
+        color: var(--accent);
+        margin: 0 0 12px 0;
+      }
+      .chat-box {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        padding: 12px;
+        max-height: 38vh;
+        min-height: 180px;
+        overflow: auto;
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        margin-bottom: 12px;
+      }
+      .message {
+        margin-bottom: 8px;
+        font-size: 15px;
+      }
+      .message .user {
+        color: var(--accent);
+        font-weight: 700;
+        margin-right: 6px;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        max-width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--text);
+        font-size: 16px;
+        outline: none;
+        box-sizing: border-box;
+      }
+      input[type="text"]:focus,
+      textarea:focus {
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.08);
+        border-color: var(--accent);
+      }
+      .controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .controls .btn {
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--accent), var(--accent-alt));
+        color: #041015;
+        transition: transform 0.15s ease;
+      }
+      .controls .btn:hover {
+        transform: translateY(-3px);
+      }
+      #leaderboardList div {
+        background: rgba(255, 255, 255, 0.035);
+        padding: 10px 12px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .bar-container {
+        width: 100%;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .bar {
+        height: 100%;
+        width: 0%;
+        border-radius: 8px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-alt));
+        transition: width 1s cubic-bezier(0.2, 0.9, 0.3, 1);
+      }
+      .fade-in {
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .fade-in.visible {
+        opacity: 1;
+        transform: none;
+      }
+      @media (max-width: 900px) {
+        :root {
+          --navbar-height: 64px;
+        }
+        nav.navbar {
+          padding: 0 18px;
+        }
+        .logo {
+          width: 88px;
+          height: 88px;
+          font-size: 28px;
+          border-radius: 16px;
+        }
+        h1 {
+          font-size: 1.6rem;
+        }
+        section {
+          padding-top: calc(var(--navbar-height)+20px);
+        }
+        .card {
+          margin: 12px;
+          padding: 16px;
+        }
+      }
+      @media (max-width: 480px) {
+        :root {
+          --navbar-height: 56px;
+        }
+        .nav-links {
+          display: none;
+        }
+        .nav-toggle {
+          display: flex;
+        }
+        .logo {
+          width: 78px;
+          height: 78px;
+          font-size: 22px;
+        }
+        .controls {
+          flex-direction: column;
+        }
+        .chat-box {
+          max-height: 40vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-logo">BA</div>
+      <div class="nav-toggle" id="navToggle">
+        <span></span><span></span><span></span>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#chat">💬 Chat</a></li>
+        <li><a href="#quests">🧩 Quests</a></li>
+        <li><a href="#leaderboard">🏆 Leaderboard</a></li>
+        <li>
+          <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+        </li>
+      </ul>
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="#chat">💬 Chat</a>
+        <a href="#quests">🧩 Quests</a>
+        <a href="#leaderboard">🏆 Leaderboard</a>
+        <button onclick="logout()">🚪 Logout</button>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section id="hero" class="fade-in">
+      <div class="logo">BA</div>
+      <h1>Willkommen bei ByteAlchemy</h1>
+      <p id="usernameDisplay">Lade Benutzerinformationen...</p>
+    </section>
+
+    <!-- CHAT -->
+    <section id="chat" class="fade-in">
+      <div class="card">
+        <h2>💬 Globaler Chat</h2>
+        <div id="chatBox" class="chat-box"></div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <input
+            id="chatInput"
+            type="text"
+            placeholder="Nachricht eingeben..."
+            autocomplete="off"
+          />
+          <div class="controls">
+            <button id="sendBtn" class="btn">Senden</button>
+            <div style="flex: 1"></div>
+            <div
+              id="chatResetInfo"
+              style="font-size: 13px; color: var(--muted)"
+            >
+              Letzter Reset: wird geladen...
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUESTS -->
+    <section id="quests" class="fade-in">
+      <div class="card">
+        <h2>🧩 Quests</h2>
+        <div id="questsList">Lade Quests...</div>
+      </div>
+    </section>
+
+    <!-- LEADERBOARD -->
+    <section id="leaderboard" class="fade-in">
+      <div class="card">
+        <h2>🏆 Leaderboard</h2>
+        <div id="leaderboardList">Lade Leaderboard...</div>
+      </div>
+    </section>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCUUJ-Cjx2fS3d4z4BGy_wYMvg91HSUd08",
+        authDomain: "bytealchemy-2ba0b.firebaseapp.com",
+        projectId: "bytealchemy-2ba0b",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
+
+      const usernameDisplay = document.getElementById("usernameDisplay");
+      const chatBox = document.getElementById("chatBox");
+      const chatInput = document.getElementById("chatInput");
+      const sendBtn = document.getElementById("sendBtn");
+      const chatResetInfo = document.getElementById("chatResetInfo");
+      const leaderboardList = document.getElementById("leaderboardList");
+      const questsList = document.getElementById("questsList");
+
+      const navToggle = document.getElementById("navToggle");
+      const mobileMenu = document.getElementById("mobileMenu");
+      navToggle.addEventListener("click", () => {
+        mobileMenu.classList.toggle("show");
+      });
+      chatInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+      sendBtn.addEventListener("click", sendMessage);
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          window.location.href = "index.html";
+          return;
+        }
+        await user.reload();
+        if (!user.emailVerified) {
+          await auth.signOut();
+          window.location.href = "index.html";
+          return;
+        }
+        const userRef = db.collection("users").doc(user.uid);
+        const doc = await userRef.get();
+        if (!doc.exists) {
+          await userRef.set({
+            username: user.displayName || user.email.split("@")[0],
+            email: user.email,
+            totalXP: 0,
+            level: 0,
+          });
+        }
+        usernameDisplay.textContent = `👋 Willkommen, ${
+          (await userRef.get()).data().username
+        }!`;
+        loadChat();
+        loadQuests();
+        loadLeaderboard();
+        cleanupOldMessages();
+        setInterval(cleanupOldMessages, 3600000);
+      });
+
+      async function logout() {
+        await auth.signOut();
+        window.location.href = "index.html";
+      }
+
+      async function addXP(userId, xpToAdd) {
+        const userRef = db.collection("users").doc(userId);
+        await db.runTransaction(async (tx) => {
+          const d = await tx.get(userRef);
+          if (!d.exists) return;
+          let totalXP = (d.data().totalXP || 0) + xpToAdd;
+          let level = Math.floor(totalXP / 100);
+          tx.update(userRef, { totalXP, level });
+        });
+        loadLeaderboard();
+      }
+
+      async function sendMessage() {
+        const text = chatInput.value.trim();
+        if (!text) return;
+        const user = auth.currentUser;
+        if (!user) return;
+        const udoc = await db.collection("users").doc(user.uid).get();
+        const uname = udoc.exists ? udoc.data().username : user.email;
+        await db
+          .collection("messages")
+          .add({
+            user: uname,
+            text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        chatInput.value = "";
+        addXP(user.uid, 5);
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      async function cleanupOldMessages() {
+        try {
+          const oneHourAgo = new Date(Date.now() - 3600000);
+          const old = await db
+            .collection("messages")
+            .where("createdAt", "<", oneHourAgo)
+            .get();
+          old.forEach(async (d) => {
+            await db.collection("messages").doc(d.id).delete();
+          });
+        } catch (e) {
+          console.warn("cleanup error", e);
+        }
+        chatResetInfo.textContent = `Letzter Reset: ${new Date().toLocaleTimeString(
+          "de-DE",
+          { hour: "2-digit", minute: "2-digit" }
+        )}`;
+      }
+
+      async function loadQuests() {
+        const snap = await db.collection("quests").get();
+        questsList.innerHTML = "";
+        if (snap.empty) {
+          questsList.textContent =
+            "Noch keine Quests vorhanden – füge welche in Firestore hinzu!";
+          return;
+        }
+        snap.forEach((d) => {
+          const q = d.data();
+          const wrapper = document.createElement("div");
+          wrapper.style.marginBottom = "12px";
+          wrapper.innerHTML = `<strong>${escapeHtml(
+            q.title || "Quest"
+          )}</strong> (${escapeHtml(
+            q.category || ""
+          )})<br><p style="margin:6px 0">${escapeHtml(q.question || "")}</p>`;
+          const answersDiv = document.createElement("div");
+          answersDiv.style.display = "flex";
+          answersDiv.style.flexWrap = "wrap";
+          answersDiv.style.gap = "8px";
+          (q.answers || []).forEach((a, i) => {
+            const btn = document.createElement("button");
+            btn.className = "btn";
+            btn.style.padding = "8px 10px";
+            btn.style.fontWeight = "600";
+            btn.style.borderRadius = "8px";
+            btn.textContent = a;
+            btn.onclick = () =>
+              checkAnswer(d.id, i, q.correctIndex, q.xp || 10);
+            answersDiv.appendChild(btn);
+          });
+          wrapper.appendChild(answersDiv);
+          questsList.appendChild(wrapper);
+        });
+      }
+
+      async function checkAnswer(questId, chosen, correct, xp) {
+        if (chosen === correct) {
+          alert(`✅ Richtig! +${xp} XP`);
+          const user = auth.currentUser;
+          await db
+            .collection("users")
+            .doc(user.uid)
+            .collection("progress")
+            .doc(questId)
+            .set({ done: true, xp, completedAt: new Date() });
+          addXP(user.uid, xp);
+        } else {
+          alert("❌ Falsch, versuch's nochmal!");
+        }
+      }
+
+      async function loadLeaderboard() {
+        leaderboardList.innerHTML = "Lade...";
+        const snap = await db
+          .collection("users")
+          .orderBy("totalXP", "desc")
+          .get();
+        const seenUsers = new Set();
+        leaderboardList.innerHTML = "";
+        let rank = 1;
+        snap.forEach((d) => {
+          const u = d.data();
+          if (seenUsers.has(u.username)) return; // Duplikate vermeiden
+          seenUsers.add(u.username);
+          const el = document.createElement("div");
+          el.innerHTML = `<strong>${rank}. ${escapeHtml(
+            u.username || d.id
+          )}</strong> — XP: ${u.totalXP || 0}, Level: ${u.level || 0}`;
+          const barContainer = document.createElement("div");
+          barContainer.className = "bar-container";
+          const bar = document.createElement("div");
+          bar.className = "bar";
+          barContainer.appendChild(bar);
+          el.appendChild(barContainer);
+          leaderboardList.appendChild(el);
+          requestAnimationFrame(() => {
+            const progress = (u.totalXP || 0) % 100;
+            bar.style.width = progress + "%";
+          });
+          rank++;
+        });
+      }
+
+      window.addEventListener("scroll", () => {
+        const navbar = document.querySelector(".navbar");
+        if (window.scrollY > 80) navbar.classList.add("small");
+        else navbar.classList.remove("small");
+      });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.12 }
+      );
+      document
+        .querySelectorAll(".fade-in")
+        .forEach((el) => observer.observe(el));
+    </script>
+  </body>
+</html>

@@ -1,142 +1,356 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ByteAlchemy</title>
-  <style>
-    :root{
-      --bg:#0f1724; --card:#0b1220; --accent:#6ee7b7; --muted:#9aa4b2;
-      --glass: rgba(255,255,255,0.03);
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;background:linear-gradient(180deg,#071025 0%, #0b1220 100%);color:#e6eef6;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;animation:fadeIn 1.5s ease forwards}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .card{width:100%;max-width:820px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(10px);animation:fadeCard 1.8s ease forwards}
-    @keyframes fadeCard{from{opacity:0;transform:scale(0.97)}to{opacity:1;transform:scale(1)}}
-    header{display:flex;align-items:center;gap:16px;animation:fadeContent 2s ease forwards}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#60a5fa);display:flex;align-items:center;justify-content:center;font-weight:700;color:#042029}
-    h1{margin:0;font-size:20px}
-    p.lead{margin:6px 0 0;color:var(--muted);font-size:13px}
-    .countdown{display:flex;gap:18px;margin-top:22px;align-items:stretch;animation:fadeContent 2.4s ease forwards}
-    .panel{flex:1;background:var(--glass);border-radius:12px;padding:18px;text-align:center;backdrop-filter: blur(6px);border:1px solid rgba(255,255,255,0.02)}
-    .num{font-size:34px;font-weight:700;letter-spacing:-0.01em}
-    .label{color:var(--muted);font-size:12px;margin-top:8px}
-    .progress-wrap{margin-top:20px;animation:fadeContent 2.6s ease forwards}
-    .bar{height:12px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;position:relative}
-    .bar > i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#60a5fa);transition:width 1s cubic-bezier(0.4, 0, 0.2, 1)}
-    .bar::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,255,255,0.1),rgba(255,255,255,0));animation:shine 2.5s infinite linear}
-    @keyframes shine{0%{transform:translateX(-100%);}100%{transform:translateX(100%);}}
-    .meta{margin-top:14px;color:var(--muted);font-size:13px}
-    .small{font-size:12px;color:var(--muted)}
-    .status-box{text-align:right;margin-top:14px;animation:fadeContent 2.8s ease forwards}
-    @keyframes fadeContent{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    @media (max-width:640px){.countdown{flex-direction:column}.num{font-size:28px}}
-  </style>
-</head>
-<body>
-  <div class="card">
-    <header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ByteAlchemy — Login / Signup</title>
+    <style>
+      :root {
+        --bg: #050912;
+        --card: rgba(255, 255, 255, 0.04);
+        --glass: rgba(255, 255, 255, 0.06);
+        --accent: #22d3ee;
+        --accent-dark: #34d399;
+        --accent-alt: #8b5cf6;
+        --text: #e6eef6;
+        --muted: #9aa4b2;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        background: radial-gradient(circle at 10% 10%, #071025, #050912 60%);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .card {
+        width: 100%;
+        max-width: 400px;
+        background: var(--glass);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        animation: fadeIn 1s ease forwards;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      .logo {
+        width: 88px;
+        height: 88px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        color: #041015;
+        font-size: 28px;
+        margin: 0 auto;
+        box-shadow: 0 6px 30px rgba(139, 92, 246, 0.35);
+        animation: logoGlow 3s ease-in-out infinite alternate;
+      }
+      @keyframes logoGlow {
+        from {
+          box-shadow: 0 6px 18px rgba(139, 92, 246, 0.25);
+        }
+        to {
+          box-shadow: 0 10px 40px rgba(139, 92, 246, 0.9);
+        }
+      }
+
+      h1 {
+        font-size: 1.8rem;
+        color: var(--accent);
+      }
+      .lead {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(0, 0, 0, 0.25);
+        color: var(--text);
+        font-size: 16px;
+        outline: none;
+      }
+      input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.08);
+      }
+
+      button {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--accent), var(--accent-alt));
+        color: #041015;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+      }
+      button:hover {
+        transform: translateY(-3px);
+      }
+
+      .toggle-link {
+        font-size: 13px;
+        color: var(--accent);
+        cursor: pointer;
+      }
+      .toggle-link:hover {
+        color: var(--accent-dark);
+        text-decoration: underline;
+      }
+      .message {
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      @media (max-width: 480px) {
+        .logo {
+          width: 78px;
+          height: 78px;
+          font-size: 22px;
+        }
+        .card {
+          padding: 16px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="card" id="authCard">
       <div class="logo">BA</div>
-      <div>
-        <h1>ByteAlchemy</h1>
-        <p class="lead">Startet am 6. Oktober 2025 um 00:00.</p>
+      <h1 id="formTitle">ByteAlchemy Login</h1>
+      <div class="lead" id="formLead">
+        Lerne, chatte und wachse – beginne hier.
       </div>
-    </header>
-
-    <div class="countdown" aria-live="polite" id="countdown">
-      <div class="panel">
-        <div class="num" id="days">--</div>
-        <div class="label">Tage</div>
+      <input
+        id="username"
+        type="text"
+        placeholder="Benutzername"
+        style="display: none"
+      />
+      <input id="email" type="text" placeholder="Email oder Benutzername" />
+      <input id="password" type="password" placeholder="Passwort" />
+      <button id="submitBtn" onclick="signin()">Sign In</button>
+      <div class="toggle-link" id="toggleLink" onclick="toggleMode()">
+        Noch kein Account? Jetzt registrieren
       </div>
-      <div class="panel">
-        <div class="num" id="hours">--</div>
-        <div class="label">Stunden</div>
+      <div class="toggle-link">
+        <a href="reset.html" style="color: var(--accent); text-decoration: none"
+          >Passwort vergessen?</a
+        >
       </div>
-      <div class="panel">
-        <div class="num" id="minutes">--</div>
-        <div class="label">Minuten</div>
+      <div
+        class="toggle-link hidden"
+        id="resendLink"
+        onclick="resendVerification()"
+      >
+        Verifikationsmail erneut senden
       </div>
-      <div class="panel">
-        <div class="num" id="seconds">--</div>
-        <div class="label">Sekunden</div>
-      </div>
+      <div class="message" id="message"></div>
     </div>
 
-    <div class="status-box">
-      <div class="small">Status: <span id="status">—</span></div>
-      <div class="small" id="startedAt">Startzeit: 6. Oktober 2025, 00:00 UTC</div>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <div class="progress-wrap">
-      <div class="bar" aria-hidden="true"><i id="progress"></i></div>
-      <div class="meta">Fortschritt: <span id="percent">0%</span> — Länge: 14 Tage</div>
-    </div>
-  </div>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCUUJ-Cjx2fS3d4z4BGy_wYMvg91HSUd08",
+        authDomain: "bytealchemy-2ba0b.firebaseapp.com",
+        projectId: "bytealchemy-2ba0b",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
 
-<script>
-(function(){
-  const START_TIME = new Date('2025-10-06T00:00:00Z').getTime();
-  const DURATION = 14 * 24 * 60 * 60 * 1000; // 14 Tage in ms
+      const msg = document.getElementById("message");
+      const usernameInput = document.getElementById("username");
+      const formTitle = document.getElementById("formTitle");
+      const formLead = document.getElementById("formLead");
+      const submitBtn = document.getElementById("submitBtn");
+      const toggleLink = document.getElementById("toggleLink");
+      const resendLink = document.getElementById("resendLink");
 
-  const $ = id => document.getElementById(id);
-  const daysEl = $('days'), hoursEl = $('hours'), minutesEl = $('minutes'), secondsEl = $('seconds');
-  const statusEl = $('status'), progressEl = $('progress'), percentEl = $('percent');
+      let isSignupMode = false;
 
-  function format(n){return String(n).padStart(2,'0')}
+      function toggleMode() {
+        isSignupMode = !isSignupMode;
+        if (isSignupMode) {
+          formTitle.textContent = "ByteAlchemy Registrierung";
+          formLead.textContent =
+            "Erstelle deinen Account und wähle deinen Benutzernamen.";
+          usernameInput.style.display = "block";
+          submitBtn.textContent = "Sign Up";
+          submitBtn.onclick = signup;
+          toggleLink.textContent = "Schon registriert? Zum Login";
+        } else {
+          formTitle.textContent = "ByteAlchemy Login";
+          formLead.textContent = "Lerne, chatte und wachse – beginne hier.";
+          usernameInput.style.display = "none";
+          submitBtn.textContent = "Sign In";
+          submitBtn.onclick = signin;
+          toggleLink.textContent = "Noch kein Account? Jetzt registrieren";
+        }
+        msg.textContent = "";
+        resendLink.classList.add("hidden");
+      }
 
-  function updateUI(){
-    const now = Date.now();
+      async function signup() {
+        const email = document.getElementById("email").value.trim();
+        const pw = document.getElementById("password").value;
+        const username = document.getElementById("username").value.trim();
+        try {
+          if (!username) throw new Error("Bitte gib einen Benutzernamen ein!");
 
-    if (now < START_TIME) {
-      const untilStart = START_TIME - now;
-      const days = Math.floor(untilStart / (24*60*60*1000));
-      const hours = Math.floor((untilStart % (24*60*60*1000)) / (60*60*1000));
-      const minutes = Math.floor((untilStart % (60*60*1000)) / (60*1000));
-      const seconds = Math.floor((untilStart % (60*1000)) / 1000);
+          const existing = await db
+            .collection("users")
+            .where("username", "==", username)
+            .get();
+          if (!existing.empty) {
+            msg.textContent = "❌ Benutzername bereits vergeben!";
+            return;
+          }
 
-      daysEl.textContent = format(days);
-      hoursEl.textContent = format(hours);
-      minutesEl.textContent = format(minutes);
-      secondsEl.textContent = format(seconds);
+          const userCredential = await auth.createUserWithEmailAndPassword(
+            email,
+            pw
+          );
+          const user = userCredential.user;
 
-      statusEl.textContent = 'Startet in';
-      progressEl.style.width = '0%';
-      percentEl.textContent = '0%';
-      return;
-    }
+          await db.collection("users").doc(user.uid).set({
+            email: user.email,
+            username: username,
+            totalXP: 0,
+            level: 1,
+            createdAt: new Date(),
+          });
 
-    const end = START_TIME + DURATION;
-    const remaining = Math.max(0, end - now);
+          await user.sendEmailVerification({
+            url: window.location.href,
+            handleCodeInApp: true,
+          });
+          msg.textContent = `✅ Willkommen, ${username}! Bitte überprüfe deine E-Mail für die Verifikation.`;
+          resendLink.classList.remove("hidden");
+        } catch (e) {
+          msg.textContent = "❌ " + e.message;
+        }
+      }
 
-    if(remaining <= 0){
-      daysEl.textContent = '00'; hoursEl.textContent='00'; minutesEl.textContent='00'; secondsEl.textContent='00';
-      statusEl.textContent = 'Cooldown abgelaufen';
-      progressEl.style.width = '100%'; percentEl.textContent = '100%';
-      return;
-    }
+      async function signin() {
+        const loginInput = document.getElementById("email").value.trim();
+        const pw = document.getElementById("password").value;
+        msg.textContent = "🔄 Anmelden...";
+        try {
+          let emailToUse = loginInput;
+          if (!loginInput.includes("@")) {
+            const query = await db
+              .collection("users")
+              .where("username", "==", loginInput)
+              .limit(1)
+              .get();
+            if (query.empty) {
+              msg.textContent = "❌ Benutzername nicht gefunden!";
+              return;
+            }
+            emailToUse = query.docs[0].data().email;
+          }
 
-    const days = Math.floor(remaining / (24*60*60*1000));
-    const hours = Math.floor((remaining % (24*60*60*1000)) / (60*60*1000));
-    const minutes = Math.floor((remaining % (60*60*1000)) / (60*1000));
-    const seconds = Math.floor((remaining % (60*1000)) / 1000);
+          const userCredential = await auth.signInWithEmailAndPassword(
+            emailToUse,
+            pw
+          );
+          const user = userCredential.user;
+          await user.reload();
+          if (!user.emailVerified) {
+            msg.textContent = "⚠️ Bitte bestätige zuerst deine E-Mail-Adresse!";
+            resendLink.classList.remove("hidden");
+            await auth.signOut();
+            return;
+          }
 
-    daysEl.textContent = format(days);
-    hoursEl.textContent = format(hours);
-    minutesEl.textContent = format(minutes);
-    secondsEl.textContent = format(seconds);
+          msg.textContent = "✅ Login erfolgreich! Weiterleitung...";
+          setTimeout(() => (window.location.href = "main.html"), 1000);
+        } catch (e) {
+          msg.textContent = "❌ " + e.message;
+        }
+      }
 
-    const elapsed = now - START_TIME;
-    const pct = Math.min(100, Math.max(0, Math.round((elapsed / DURATION) * 100)));
-    progressEl.style.width = pct + '%';
-    percentEl.textContent = pct + '%';
+      async function resendVerification() {
+        const email = document.getElementById("email").value;
+        const pw = document.getElementById("password").value;
+        if (!email || !pw) {
+          msg.textContent =
+            "Bitte gib zuerst deine E-Mail und dein Passwort ein.";
+          return;
+        }
+        try {
+          const userCredential = await auth.signInWithEmailAndPassword(
+            email,
+            pw
+          );
+          const user = userCredential.user;
+          if (user.emailVerified) {
+            msg.textContent = "✅ Deine E-Mail ist bereits verifiziert!";
+            return;
+          }
+          await user.sendEmailVerification({
+            url: window.location.href,
+            handleCodeInApp: true,
+          });
+          msg.textContent = "📧 Verifikationsmail wurde erneut gesendet!";
+          await auth.signOut();
+        } catch (e) {
+          msg.textContent = "❌ " + e.message;
+        }
+      }
 
-    statusEl.textContent = 'Cooldown läuft';
-  }
-
-  updateUI();
-  setInterval(updateUI, 1000);
-})();
-</script>
-</body>
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          await user.reload();
+          if (user.emailVerified) {
+            msg.textContent = "✅ E-Mail bestätigt! Weiterleitung...";
+            setTimeout(() => (window.location.href = "main.html"), 1500);
+          } else {
+            msg.textContent = "⚠️ Bitte bestätige zuerst deine E-Mail-Adresse!";
+            resendLink.classList.remove("hidden");
+            await auth.signOut();
+          }
+        }
+      });
+    </script>
+  </body>
 </html>
