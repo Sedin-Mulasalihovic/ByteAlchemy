@@ -422,7 +422,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <!-- ...dein bisheriger HTML-Code bleibt unverändert bis zum Firebase-Script... -->
 
     <script>
       const firebaseConfig = {
@@ -480,7 +479,8 @@
           (await userRef.get()).data().username
         }!`;
 
-        loadChat(); // <-- hier wird die neue Chat-Funktion aufgerufen
+        addSampleQuests(); // <-- automatisch Quests hinzufügen, falls noch keine
+        loadChat();
         loadQuests();
         loadLeaderboard();
         cleanupOldMessages();
@@ -553,24 +553,20 @@
         const messagesRef = db
           .collection("messages")
           .orderBy("createdAt", "desc")
-          .limit(50); // nur die letzten 50 Nachrichten
-
+          .limit(50);
         messagesRef.onSnapshot((snapshot) => {
           chatBox.innerHTML = "";
-          const messages = snapshot.docs.reverse(); // chronologisch anzeigen
-
+          const messages = snapshot.docs.reverse();
           messages.forEach((doc) => {
             const msg = doc.data();
             const div = document.createElement("div");
             div.className = "message";
-
             const time = msg.createdAt
               ? msg.createdAt.toDate().toLocaleTimeString("de-DE", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })
               : "";
-
             div.innerHTML = `<span class="user">${escapeHtml(
               msg.user
             )}:</span> ${escapeHtml(
@@ -578,12 +574,27 @@
             )} <span style="color:var(--muted);font-size:12px;">${time}</span>`;
             chatBox.appendChild(div);
           });
-
-          chatBox.scrollTop = chatBox.scrollHeight; // automatisch nach unten scrollen
+          chatBox.scrollTop = chatBox.scrollHeight;
         });
       }
 
       async function loadQuests() {
+        const user = auth.currentUser;
+        if (!user) return;
+
+        // Lade abgeschlossene Quests des Nutzers
+        const userProgressRef = db
+          .collection("users")
+          .doc(user.uid)
+          .collection("progress");
+
+        const progressSnap = await userProgressRef.get();
+        const completedQuests = new Set();
+        progressSnap.forEach((doc) => {
+          if (doc.data().done) completedQuests.add(doc.id);
+        });
+
+        // Lade alle Quests
         const snap = await db.collection("quests").get();
         questsList.innerHTML = "";
         if (snap.empty) {
@@ -591,30 +602,47 @@
             "Noch keine Quests vorhanden – füge welche in Firestore hinzu!";
           return;
         }
+
         snap.forEach((d) => {
           const q = d.data();
           const wrapper = document.createElement("div");
           wrapper.style.marginBottom = "12px";
+          wrapper.style.transition = "background 0.5s, box-shadow 0.5s";
+          wrapper.style.padding = "10px";
+
           wrapper.innerHTML = `<strong>${escapeHtml(
             q.title || "Quest"
           )}</strong> (${escapeHtml(
             q.category || ""
           )})<br><p style="margin:6px 0">${escapeHtml(q.question || "")}</p>`;
+
           const answersDiv = document.createElement("div");
           answersDiv.style.display = "flex";
           answersDiv.style.flexWrap = "wrap";
           answersDiv.style.gap = "8px";
-          (q.answers || []).forEach((a, i) => {
-            const btn = document.createElement("button");
-            btn.className = "btn";
-            btn.style.padding = "8px 10px";
-            btn.style.fontWeight = "600";
-            btn.style.borderRadius = "8px";
-            btn.textContent = a;
-            btn.onclick = () =>
-              checkAnswer(d.id, i, q.correctIndex, q.xp || 10);
-            answersDiv.appendChild(btn);
-          });
+
+          if (completedQuests.has(d.id)) {
+            const doneLabel = document.createElement("span");
+            doneLabel.textContent = "✅ Quest erledigt";
+            doneLabel.style.fontWeight = "700";
+            doneLabel.style.color = "limegreen";
+            answersDiv.appendChild(doneLabel);
+            wrapper.style.background = "rgba(0,128,0,0.1)";
+            wrapper.style.boxShadow = "0 0 12px rgba(0,255,0,0.4)";
+          } else {
+            (q.answers || []).forEach((a, i) => {
+              const btn = document.createElement("button");
+              btn.className = "btn";
+              btn.style.padding = "8px 10px";
+              btn.style.fontWeight = "600";
+              btn.style.borderRadius = "8px";
+              btn.textContent = a;
+              btn.onclick = () =>
+                checkAnswer(d.id, i, q.correctIndex, q.xp || 10);
+              answersDiv.appendChild(btn);
+            });
+          }
+
           wrapper.appendChild(answersDiv);
           questsList.appendChild(wrapper);
         });
@@ -666,6 +694,48 @@
           });
           rank++;
         });
+      }
+
+      // ----- Beispiel-Quests Script -----
+      async function addSampleQuests() {
+        const questsRef = db.collection("quests");
+        const snap = await questsRef.get();
+        if (!snap.empty) {
+          console.log("Quests bereits vorhanden, nichts hinzugefügt.");
+          return;
+        }
+        const sampleQuests = [
+          {
+            title: "Mathe-Basis",
+            category: "Mathematik",
+            question: "Was ist 2 + 2?",
+            answers: ["3", "4", "5"],
+            correctIndex: 1,
+            xp: 10,
+          },
+          {
+            title: "Programmier-Quiz",
+            category: "Code",
+            question:
+              "Welches Schlüsselwort wird in JavaScript verwendet, um eine Variable zu deklarieren?",
+            answers: ["var", "let", "beide"],
+            correctIndex: 2,
+            xp: 15,
+          },
+          {
+            title: "Allgemeinwissen",
+            category: "Wissen",
+            question: "Wie viele Kontinente gibt es auf der Erde?",
+            answers: ["5", "6", "7"],
+            correctIndex: 2,
+            xp: 10,
+          },
+        ];
+        for (const q of sampleQuests) {
+          await questsRef.add(q);
+        }
+        console.log("Beispiel-Quests erfolgreich hinzugefügt!");
+        loadQuests(); // sofort anzeigen
       }
 
       window.addEventListener("scroll", () => {
