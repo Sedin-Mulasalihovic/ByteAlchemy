@@ -18,7 +18,6 @@
         --muted: #9aa4b2;
         --navbar-height: 72px;
       }
-      /* Grund-Styles, Navbar, Cards etc. bleiben wie vorher */
       html,
       body {
         height: 100%;
@@ -36,6 +35,8 @@
         color: var(--text);
         scroll-behavior: smooth;
       }
+
+      /* NAV / LAYOUT (unverändert größtenteils) */
       nav.navbar {
         position: fixed;
         top: 0;
@@ -137,6 +138,8 @@
         background: rgba(34, 211, 238, 0.1);
         color: var(--accent);
       }
+
+      /* Logo + hero */
       .logo {
         width: 110px;
         height: 110px;
@@ -160,6 +163,7 @@
           box-shadow: 0 10px 40px rgba(139, 92, 246, 0.9);
         }
       }
+
       h1 {
         font-size: 2.2rem;
         margin: 8px 0 6px 0;
@@ -171,8 +175,9 @@
         margin-bottom: 18px;
         text-shadow: 0 0 10px rgba(139, 92, 246, 0.35);
       }
+
       section {
-        padding-top: calc(var(--navbar-height)+36px);
+        padding-top: calc(var(--navbar-height) + 36px);
         padding-bottom: 60px;
         min-height: calc(100vh - var(--navbar-height));
         box-sizing: border-box;
@@ -182,6 +187,7 @@
         justify-content: center;
         text-align: center;
       }
+
       .card {
         width: 100%;
         max-width: 760px;
@@ -194,10 +200,12 @@
         backdrop-filter: blur(6px) saturate(1.05);
         text-align: left;
       }
+
       h2 {
         color: var(--accent);
         margin: 0 0 12px 0;
       }
+
       .chat-box {
         background: rgba(255, 255, 255, 0.03);
         border-radius: 10px;
@@ -208,15 +216,18 @@
         border: 1px solid rgba(255, 255, 255, 0.04);
         margin-bottom: 12px;
       }
+
       .message {
         margin-bottom: 8px;
         font-size: 15px;
       }
+
       .message .user {
         color: var(--accent);
         font-weight: 700;
         margin-right: 6px;
       }
+
       input[type="text"],
       textarea {
         width: 100%;
@@ -230,18 +241,29 @@
         outline: none;
         box-sizing: border-box;
       }
+
       input[type="text"]:focus,
       textarea:focus {
         box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.08);
         border-color: var(--accent);
       }
+
       .controls {
         display: flex;
         gap: 12px;
         align-items: center;
         margin-top: 8px;
       }
-      .controls .btn {
+
+      /* ---- GLOBAL BUTTON STYLE (WICHTIG) ----
+         Buttons für Antworten nutzen jetzt diese Klasse:
+         .btn
+         Vorher war nur .controls .btn definiert -> auf Handys außerhalb .controls kein Style */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
         padding: 10px 14px;
         border-radius: 10px;
         border: none;
@@ -249,11 +271,41 @@
         font-weight: 700;
         background: linear-gradient(90deg, var(--accent), var(--accent-alt));
         color: #041015;
-        transition: transform 0.15s ease;
+        transition: transform 0.12s ease, opacity 0.12s ease;
+        -webkit-appearance: none;
+        box-shadow: 0 4px 18px rgba(139, 92, 246, 0.08);
       }
-      .controls .btn:hover {
-        transform: translateY(-3px);
+      .btn:active {
+        transform: translateY(1px);
       }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      /* Quest done label (gut sichtbar) */
+      .quest-done-label {
+        margin-top: 10px;
+        padding: 8px;
+        background: rgba(0, 255, 0, 0.08);
+        border: 1px solid rgba(0, 255, 0, 0.3);
+        border-radius: 8px;
+        color: limegreen;
+        font-weight: 700;
+        text-align: center;
+        animation: fadeIn 0.45s ease forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.98);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
       #leaderboardList div {
         background: rgba(255, 255, 255, 0.035);
         padding: 10px 12px;
@@ -277,6 +329,7 @@
         background: linear-gradient(90deg, var(--accent), var(--accent-alt));
         transition: width 1s cubic-bezier(0.2, 0.9, 0.3, 1);
       }
+
       .fade-in {
         opacity: 0;
         transform: translateY(14px);
@@ -301,6 +354,28 @@
         100% {
           transform: scale(1);
           box-shadow: 0 0 0 rgba(0, 255, 0, 0);
+        }
+      }
+
+      /* Mobile tweaks */
+      @media (max-width: 600px) {
+        :root {
+          --navbar-height: 64px;
+        }
+        .btn {
+          width: 100%;
+          padding: 14px 16px;
+          font-size: 16px;
+        }
+        .controls {
+          flex-direction: column;
+        }
+        .logo {
+          width: 88px;
+          height: 88px;
+        }
+        .card {
+          padding: 16px;
         }
       }
     </style>
@@ -405,6 +480,7 @@
       navToggle.addEventListener("click", () => {
         mobileMenu.classList.toggle("show");
       });
+
       chatInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") {
           e.preventDefault();
@@ -413,6 +489,7 @@
       });
       sendBtn.addEventListener("click", sendMessage);
 
+      // Auth listener
       auth.onAuthStateChanged(async (user) => {
         if (!user) {
           window.location.href = "index.html";
@@ -424,6 +501,7 @@
           window.location.href = "index.html";
           return;
         }
+
         const userRef = db.collection("users").doc(user.uid);
         const doc = await userRef.get();
         if (!doc.exists) {
@@ -438,8 +516,9 @@
           (await userRef.get()).data().username
         }!`;
 
-        addSampleQuests();
+        // Wenn du Chat willst, entferne das display:none weiter oben
         loadChat();
+        addSampleQuests();
         loadQuests();
         loadLeaderboard();
         cleanupOldMessages();
@@ -450,6 +529,7 @@
         await auth.signOut();
         window.location.href = "index.html";
       }
+
       async function addXP(userId, xpToAdd) {
         const userRef = db.collection("users").doc(userId);
         await db.runTransaction(async (tx) => {
@@ -469,13 +549,17 @@
         if (!user) return;
         const udoc = await db.collection("users").doc(user.uid).get();
         const uname = udoc.exists ? udoc.data().username : user.email;
-        await db.collection("messages").add({
-          user: uname,
-          text,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
-        chatInput.value = "";
-        addXP(user.uid, 5);
+        try {
+          await db.collection("messages").add({
+            user: uname,
+            text,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          chatInput.value = "";
+          addXP(user.uid, 5);
+        } catch (e) {
+          console.error("chat send error", e);
+        }
       }
 
       function escapeHtml(str) {
@@ -508,144 +592,169 @@
       }
 
       async function loadChat() {
-        const messagesRef = db
-          .collection("messages")
-          .orderBy("createdAt", "desc")
-          .limit(50);
-        messagesRef.onSnapshot((snapshot) => {
-          chatBox.innerHTML = "";
-          const messages = snapshot.docs.reverse();
-          messages.forEach((doc) => {
-            const msg = doc.data();
-            const div = document.createElement("div");
-            const time = msg.createdAt
-              ? msg.createdAt.toDate().toLocaleTimeString("de-DE", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
-              : "";
-            div.className = "message";
-            div.innerHTML = `<span class="user">${escapeHtml(
-              msg.user
-            )}:</span> ${escapeHtml(
-              msg.text
-            )} <span style="color:var(--muted);font-size:12px;">${time}</span>`;
-            chatBox.appendChild(div);
+        // falls Chat gebraucht: live updates
+        try {
+          const messagesRef = db
+            .collection("messages")
+            .orderBy("createdAt", "desc")
+            .limit(50);
+          messagesRef.onSnapshot((snapshot) => {
+            chatBox.innerHTML = "";
+            const messages = snapshot.docs.reverse();
+            messages.forEach((doc) => {
+              const msg = doc.data();
+              const div = document.createElement("div");
+              const time = msg.createdAt
+                ? msg.createdAt.toDate().toLocaleTimeString("de-DE", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "";
+              div.className = "message";
+              div.innerHTML = `<span class="user">${escapeHtml(
+                msg.user
+              )}:</span> ${escapeHtml(
+                msg.text
+              )} <span style="color:var(--muted);font-size:12px;">${time}</span>`;
+              chatBox.appendChild(div);
+            });
+            chatBox.scrollTop = chatBox.scrollHeight;
           });
-          chatBox.scrollTop = chatBox.scrollHeight;
-        });
+        } catch (e) {
+          console.warn("chat load error", e);
+        }
       }
 
       async function loadQuests() {
         const user = auth.currentUser;
         if (!user) return;
 
-        const userProgressRef = db
-          .collection("users")
-          .doc(user.uid)
-          .collection("progress");
-        const progressSnap = await userProgressRef.get();
-        const completedQuests = new Set();
-        progressSnap.forEach((doc) => {
-          if (doc.data().done) completedQuests.add(doc.id);
-        });
-
-        const snap = await db.collection("quests").get();
-        questsList.innerHTML = "";
-
-        if (snap.empty) {
-          questsList.textContent =
-            "Noch keine Quests vorhanden – füge welche in Firestore hinzu!";
-          return;
+        // Lade Fortschritt des Nutzers
+        let completedQuests = new Set();
+        try {
+          const userProgressRef = db
+            .collection("users")
+            .doc(user.uid)
+            .collection("progress");
+          const progressSnap = await userProgressRef.get();
+          progressSnap.forEach((doc) => {
+            if (doc.data().done) completedQuests.add(doc.id);
+          });
+        } catch (e) {
+          console.error("progress load error", e);
         }
 
-        snap.forEach((d) => {
-          const q = d.data();
-          const wrapper = document.createElement("div");
-          wrapper.dataset.questId = d.id;
-          wrapper.className = "quest-wrapper";
-          wrapper.style.marginBottom = "12px";
-          wrapper.style.padding = "10px";
-          wrapper.style.borderRadius = "10px";
-          wrapper.style.transition = "background 0.5s, box-shadow 0.5s";
-
-          const title = document.createElement("strong");
-          title.textContent = q.title || "Quest";
-          wrapper.appendChild(title);
-          wrapper.insertAdjacentHTML(
-            "beforeend",
-            ` (${escapeHtml(
-              q.category || ""
-            )})<br><p style="margin:6px 0">${escapeHtml(q.question || "")}</p>`
-          );
-
-          const answersDiv = document.createElement("div");
-          answersDiv.style.display = "flex";
-          answersDiv.style.flexWrap = "wrap";
-          answersDiv.style.gap = "8px";
-
-          // Wenn Quest abgeschlossen, sofort als "erledigt" markieren
-          if (completedQuests.has(d.id)) {
-            showQuestCompleted(wrapper);
-          } else {
-            (q.answers || []).forEach((a, i) => {
-              const btn = document.createElement("button");
-              btn.className = "btn";
-              btn.style.padding = "8px 10px";
-              btn.style.fontWeight = "600";
-              btn.style.borderRadius = "8px";
-              btn.textContent = a;
-              btn.onclick = () =>
-                checkAnswer(d.id, i, q.correctIndex, q.xp || 10, wrapper);
-              answersDiv.appendChild(btn);
-            });
+        // Lade Quests
+        try {
+          const snap = await db.collection("quests").get();
+          questsList.innerHTML = "";
+          if (snap.empty) {
+            questsList.textContent =
+              "Noch keine Quests vorhanden – füge welche in Firestore hinzu!";
+            return;
           }
 
-          wrapper.appendChild(answersDiv);
-          questsList.appendChild(wrapper);
-        });
+          snap.forEach((d) => {
+            const q = d.data();
+            const wrapper = document.createElement("div");
+            wrapper.dataset.questId = d.id;
+            wrapper.className = "quest-wrapper";
+            wrapper.style.marginBottom = "12px";
+            wrapper.style.padding = "10px";
+            wrapper.style.borderRadius = "10px";
+            wrapper.style.transition = "background 0.5s, box-shadow 0.5s";
+
+            const title = document.createElement("strong");
+            title.textContent = q.title || "Quest";
+            wrapper.appendChild(title);
+            wrapper.insertAdjacentHTML(
+              "beforeend",
+              ` (${escapeHtml(
+                q.category || ""
+              )})<br><p style="margin:6px 0">${escapeHtml(
+                q.question || ""
+              )}</p>`
+            );
+
+            const answersDiv = document.createElement("div");
+            answersDiv.style.display = "flex";
+            answersDiv.style.flexWrap = "wrap";
+            answersDiv.style.gap = "8px";
+
+            // Wenn Quest abgeschlossen, sofort als "erledigt" markieren
+            if (completedQuests.has(d.id)) {
+              showQuestCompleted(wrapper);
+            } else {
+              (q.answers || []).forEach((a, i) => {
+                const btn = document.createElement("button");
+                btn.className = "btn";
+                btn.style.padding = "8px 10px";
+                btn.style.fontWeight = "600";
+                btn.style.borderRadius = "8px";
+                btn.textContent = a;
+                btn.onclick = () =>
+                  checkAnswer(d.id, i, q.correctIndex, q.xp || 10, wrapper);
+                answersDiv.appendChild(btn);
+              });
+            }
+
+            wrapper.appendChild(answersDiv);
+            questsList.appendChild(wrapper);
+          });
+        } catch (e) {
+          console.error("quest load error", e);
+          questsList.textContent = "Fehler beim Laden der Quests.";
+        }
       }
 
       function showQuestCompleted(wrapper) {
         wrapper.style.background = "rgba(0,128,0,0.15)";
         wrapper.style.boxShadow = "0 0 10px rgba(0,255,0,0.4)";
-        wrapper.style.transform = "scale(1.02)";
-        const doneLabel = document.createElement("span");
-        doneLabel.textContent = "✅ Quest erledigt!";
-        doneLabel.style.fontWeight = "700";
-        doneLabel.style.color = "limegreen";
-        doneLabel.style.display = "block";
-        doneLabel.style.marginTop = "6px";
+        wrapper.style.transform = "scale(1.01)";
+        wrapper.classList.add("quest-complete");
+        // Entferne Buttons (falls noch da) und setze Label
+        wrapper.querySelectorAll("button").forEach((b) => b.remove());
+        let doneLabel = document.createElement("div");
+        doneLabel.className = "quest-done-label";
+        doneLabel.innerHTML =
+          "✅ <strong>Quest abgeschlossen!</strong><br><small style='color:var(--muted)'>Deine Antwort wurde gespeichert</small>";
         wrapper.appendChild(doneLabel);
       }
 
       async function checkAnswer(questId, chosen, correct, xp, wrapper) {
+        const user = auth.currentUser;
+        if (!user) return alert("Benutzer nicht angemeldet.");
         if (chosen === correct) {
-          const user = auth.currentUser;
           alert(`✅ Richtig! +${xp} XP`);
-
-          // Sofort visuell anzeigen (auch auf Handy)
+          // Sofort UI-Feedback (auch auf Handy)
           showQuestCompleted(wrapper);
-
-          // Buttons deaktivieren
+          // Deaktiviere weitere Interaktion
           wrapper
             .querySelectorAll("button")
             .forEach((btn) => (btn.disabled = true));
 
-          // In Firestore speichern
-          await db
-            .collection("users")
-            .doc(user.uid)
-            .collection("progress")
-            .doc(questId)
-            .set({
-              done: true,
-              xp,
-              completedAt: new Date(),
-            });
+          // In Firestore speichern (try/catch -> Fehler in Konsole)
+          try {
+            await db
+              .collection("users")
+              .doc(user.uid)
+              .collection("progress")
+              .doc(questId)
+              .set({
+                done: true,
+                xp,
+                completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+              });
+          } catch (e) {
+            console.error("progress write error", e);
+          }
 
-          // XP hinzufügen
-          addXP(user.uid, xp);
+          // XP hinzufügen (transaktion)
+          try {
+            await addXP(user.uid, xp);
+          } catch (e) {
+            console.error("addXP error", e);
+          }
         } else {
           alert("❌ Falsch, versuch's nochmal!");
         }
@@ -653,77 +762,152 @@
 
       async function loadLeaderboard() {
         leaderboardList.innerHTML = "Lade...";
-        const snap = await db
-          .collection("users")
-          .orderBy("totalXP", "desc")
-          .get();
-        leaderboardList.innerHTML = "";
-        let rank = 1;
-        const seenUsers = new Set();
-        snap.forEach((d) => {
-          const u = d.data();
-          if (seenUsers.has(u.username)) return;
-          seenUsers.add(u.username);
-          const el = document.createElement("div");
-          el.innerHTML = `<strong>${rank}. ${escapeHtml(
-            u.username || d.id
-          )}</strong> — XP: ${u.totalXP || 0}, Level: ${u.level || 0}`;
-          const barContainer = document.createElement("div");
-          barContainer.className = "bar-container";
-          const bar = document.createElement("div");
-          bar.className = "bar";
-          barContainer.appendChild(bar);
-          el.appendChild(barContainer);
-          leaderboardList.appendChild(el);
-          requestAnimationFrame(() => {
-            const progress = (u.totalXP || 0) % 100;
-            bar.style.width = progress + "%";
+        try {
+          const snap = await db
+            .collection("users")
+            .orderBy("totalXP", "desc")
+            .get();
+          leaderboardList.innerHTML = "";
+          let rank = 1;
+          const seenUsers = new Set();
+          snap.forEach((d) => {
+            const u = d.data();
+            if (seenUsers.has(u.username)) return;
+            seenUsers.add(u.username);
+            const el = document.createElement("div");
+            el.innerHTML = `<strong>${rank}. ${escapeHtml(
+              u.username || d.id
+            )}</strong> — XP: ${u.totalXP || 0}, Level: ${u.level || 0}`;
+            const barContainer = document.createElement("div");
+            barContainer.className = "bar-container";
+            const bar = document.createElement("div");
+            bar.className = "bar";
+            barContainer.appendChild(bar);
+            el.appendChild(barContainer);
+            leaderboardList.appendChild(el);
+            requestAnimationFrame(() => {
+              const progress = (u.totalXP || 0) % 100;
+              bar.style.width = progress + "%";
+            });
+            rank++;
           });
-          rank++;
-        });
+        } catch (e) {
+          console.error("leaderboard load error", e);
+          leaderboardList.textContent = "Fehler beim Laden des Leaderboards.";
+        }
       }
 
+      // ----- Beispiel- + zusätzliche Programmier-Quests -----
       async function addSampleQuests() {
-        const questsRef = db.collection("quests");
-        const snap = await questsRef.get();
-        if (!snap.empty) {
-          console.log("Quests bereits vorhanden, nichts hinzugefügt.");
-          return;
+        try {
+          const questsRef = db.collection("quests");
+          const snap = await questsRef.get();
+          if (!snap.empty) {
+            console.log("Quests bereits vorhanden, nichts hinzugefügt.");
+            return;
+          }
+
+          const sampleQuests = [
+            // deine bisherigen Beispiele (bleiben)
+            {
+              title: "Variablen verstehen",
+              category: "JavaScript Grundlagen",
+              question:
+                "Wie deklariert man in JavaScript eine Variable, die sich nicht ändert?",
+              answers: ["let", "var", "const", "static"],
+              correctIndex: 2,
+              xp: 15,
+            },
+            {
+              title: "Mathe-Basis",
+              category: "Mathematik",
+              question: "Was ist 2 + 2?",
+              answers: ["3", "4", "5"],
+              correctIndex: 1,
+              xp: 10,
+            },
+            {
+              title: "Programmier-Quiz",
+              category: "Code",
+              question:
+                "Welches Schlüsselwort wird in JavaScript verwendet, um eine Variable zu deklarieren?",
+              answers: ["var", "let", "beide"],
+              correctIndex: 2,
+              xp: 15,
+            },
+            {
+              title: "Allgemeinwissen",
+              category: "Wissen",
+              question: "Wie viele Kontinente gibt es auf der Erde?",
+              answers: ["5", "6", "7"],
+              correctIndex: 2,
+              xp: 10,
+            },
+
+            // zusätzliche Programmier-Quests (neu)
+            {
+              title: "Array Index",
+              category: "JavaScript",
+              question:
+                "Wie greift man in JS auf das erste Element eines Arrays 'arr' zu?",
+              answers: ["arr[0]", "arr[1]", "arr.first"],
+              correctIndex: 0,
+              xp: 12,
+            },
+            {
+              title: "Funktionen",
+              category: "JavaScript",
+              question:
+                "Welches Wort erstellt eine Funktion in JS (klassisch)?",
+              answers: ["function", "func", "def"],
+              correctIndex: 0,
+              xp: 12,
+            },
+            {
+              title: "CSS Selektor",
+              category: "CSS",
+              question:
+                "Welcher Selektor wählt ein Element mit id='header' aus?",
+              answers: [".header", "#header", "header"],
+              correctIndex: 1,
+              xp: 12,
+            },
+            {
+              title: "HTML Struktur",
+              category: "HTML",
+              question: "Welches Tag ist für einen Absatz in HTML zuständig?",
+              answers: ["<p>", "<div>", "<span>"],
+              correctIndex: 0,
+              xp: 10,
+            },
+            {
+              title: "Python Grund",
+              category: "Python",
+              question: "Wie kommentiert man eine einzelne Zeile in Python?",
+              answers: ["// Kommentar", "# Kommentar", "/* Kommentar */"],
+              correctIndex: 1,
+              xp: 12,
+            },
+            {
+              title: "Promise",
+              category: "JavaScript",
+              question: "Welcher Methodename gehört zu Promises?",
+              answers: ["then", "wait", "sleep"],
+              correctIndex: 0,
+              xp: 15,
+            },
+          ];
+
+          for (const q of sampleQuests) {
+            await questsRef.add(q);
+          }
+          console.log("Beispiel-Quests erfolgreich hinzugefügt!");
+        } catch (e) {
+          console.error("addSampleQuests error", e);
         }
-        const sampleQuests = [
-          {
-            title: "Mathe-Basis",
-            category: "Mathematik",
-            question: "Was ist 2 + 2?",
-            answers: ["3", "4", "5"],
-            correctIndex: 1,
-            xp: 10,
-          },
-          {
-            title: "Programmier-Quiz",
-            category: "Code",
-            question:
-              "Welches Schlüsselwort wird in JavaScript verwendet, um eine Variable zu deklarieren?",
-            answers: ["var", "let", "beide"],
-            correctIndex: 2,
-            xp: 15,
-          },
-          {
-            title: "Allgemeinwissen",
-            category: "Wissen",
-            question: "Wie viele Kontinente gibt es auf der Erde?",
-            answers: ["5", "6", "7"],
-            correctIndex: 2,
-            xp: 10,
-          },
-        ];
-        for (const q of sampleQuests) {
-          await questsRef.add(q);
-        }
-        console.log("Beispiel-Quests erfolgreich hinzugefügt!");
-        loadQuests();
       }
 
+      // small helper: observe fade-ins
       window.addEventListener("scroll", () => {
         const navbar = document.querySelector(".navbar");
         if (window.scrollY > 80) navbar.classList.add("small");
